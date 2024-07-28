@@ -5,6 +5,7 @@ import * as React from 'react'
 import {useCombobox} from '../use-combobox'
 import {getItems} from '../workerized-filter-cities'
 import {useAsync, useForceRerender} from '../utils'
+import { dequal } from 'dequal'
 
 function Menu({
   items,
@@ -30,7 +31,7 @@ function Menu({
     </ul>
   )
 }
-// 🐨 Memoize the Menu here using React.memo
+Menu = React.memo(Menu);
 
 function ListItem({
   getItemProps,
@@ -56,7 +57,20 @@ function ListItem({
     />
   )
 }
-// 🐨 Memoize the ListItem here using React.memo
+ListItem = React.memo(ListItem, (oldProps, newProps) => {
+  if (dequal(oldProps, newProps)) return true;
+
+  const { highlightedIndex: newHighlightedIndex, index: oldIndex, ...oldOthers } = oldProps;
+  const { highlightedIndex: oldHighlightedIndex, index: newIndex, ...newOthers } = newProps;
+
+  const myIndexChanged = (oldIndex !== newIndex);
+
+  const myHighlightChanged = 
+    (oldHighlightedIndex === newIndex) ||
+    (newHighlightedIndex === newIndex)
+
+  return dequal(oldOthers, newOthers) && (!myIndexChanged) && (!myHighlightChanged);
+});
 
 function App() {
   const forceRerender = useForceRerender()
